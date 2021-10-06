@@ -25,7 +25,8 @@ app.use((req, res, next) => {
 				user.username,
 				user.email,
 				user.cart,
-				user._id
+				user._id,
+				user.orders
 			);
 			req.user = newUser;
 			next();
@@ -41,5 +42,6 @@ app.use(shopRoutes);
 app.use(errorController.get404);
 
 mongoConnect((client) => {
+	console.log("Server listening on port: 3000");
 	app.listen(3000);
 });

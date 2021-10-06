@@ -3,11 +3,12 @@ const mongodb = require("mongodb");
 
 const { ObjectId } = mongodb;
 class User {
-	constructor(username, email, cart, id) {
+	constructor(username, email, cart, id, orders) {
 		this.username = username;
 		this.email = email;
 		this.cart = cart;
 		this._id = id;
+		this.orders = orders;
 	}
 	save() {
 		const db = getDb();
@@ -51,20 +52,15 @@ class User {
 			})
 			.toArray()
 			.then((products) => {
-				let newCartItems = [];
-				if (products.length === cartItems.length) {
-					newCartItems = cartItems.map((cartItem, ind) => {
-						const product = products.find(
-							(p) =>
-								p._id.toString() ===
-								cartItem.productId.toString()
-						);
-						console.log(cartItem, product);
-						cartItem.product = product;
-						return cartItem;
-					});
-				}
-				return newCartItems;
+				const newProducts = products.map((product) => {
+					const qty = cartItems.find(
+						(cartItem) =>
+							cartItem.productId.toString() ===
+							product._id.toString()
+					).quantity;
+					return { ...product, quantity: qty };
+				});
+				return newProducts;
 			})
 			.catch((error) => console.error(error));
 	}
@@ -83,6 +79,53 @@ class User {
 				}
 			}
 		);
+	}
+	addOrder() {
+		const db = getDb();
+		return this.getCart()
+			.then((products) => {
+				const order = {
+					items: products,
+					user: {
+						_id: new ObjectId(this._id),
+						name: this.username
+					}
+				};
+				return db
+					.collection("orders")
+					.insertOne(order)
+					.then((order) => {
+						console.log(order);
+						const orders = this.orders || [];
+						orders.push(order.insertedId);
+						return db.collection("users").updateOne(
+							{ _id: new ObjectId(this._id) },
+							{
+								$set: {
+									cart: { items: [] },
+									orders: orders
+								}
+							}
+						);
+					});
+			})
+			.catch((error) => console.log(error));
+	}
+	getOrders() {
+		const ordersId = this.orders;
+		console.log(this);
+		const db = getDb();
+		return db
+			.collection("orders")
+			.find({
+				_id: { $in: ordersId.map((order) => new ObjectId(order)) }
+			})
+			.toArray()
+			.then((orders) => {
+				console.log("3: these are the complete orders: ", orders);
+				return orders;
+			})
+			.catch((error) => console.log(error));
 	}
 	static findById(id) {
 		const db = getDb();
