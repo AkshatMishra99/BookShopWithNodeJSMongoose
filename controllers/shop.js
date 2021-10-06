@@ -45,9 +45,10 @@ exports.getIndex = (req, res, next) => {
 exports.getCart = (req, res, next) => {
 	req.user
 		.getCart()
-		.then((cartItems) => {
+		.then((cart) => {
+			console.log(cart);
 			res.render("shop/cart", {
-				products: cartItems,
+				products: cart.items,
 				pageTitle: "Cart",
 				path: "/cart"
 			});
@@ -69,17 +70,16 @@ exports.postCart = (req, res, next) => {
 
 exports.postCartDeleteProduct = (req, res, next) => {
 	const prodId = req.body.productId;
-	console.log(req.body);
 	req.user
 		.removeCartProduct(prodId)
 		.then((result) => {
+			console.log(result);
 			res.redirect("/cart");
 		})
 		.catch((err) => console.log(err));
 };
 
 exports.postOrder = (req, res, next) => {
-	let fetchedCart;
 	req.user
 		.addOrder()
 		.then((result) => {
