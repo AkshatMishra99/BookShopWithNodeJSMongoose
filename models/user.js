@@ -118,7 +118,7 @@ class User {
 		return db
 			.collection("orders")
 			.find({
-				_id: { $in: ordersId.map((order) => new ObjectId(order)) }
+				"user._id": new ObjectId(this._id)
 			})
 			.toArray()
 			.then((orders) => {
