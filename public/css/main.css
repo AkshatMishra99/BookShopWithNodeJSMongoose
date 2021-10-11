@@ -58,13 +58,22 @@ form {
 	padding: 0;
 }
 
-.main-header__item a {
+.main-header__item a,
+.main-header__item button {
 	text-decoration: none;
 	color: white;
 }
-
+.main-header__item button {
+	outline: none;
+	border: none;
+	background-color: #00695c;
+	font-size: inherit;
+	cursor: pointer;
+}
 .main-header__item a:hover,
+.main-header__item button:hover,
 .main-header__item a:active,
+.main-header__item button:active,
 .main-header__item a.active {
 	color: #ffeb3b;
 }
